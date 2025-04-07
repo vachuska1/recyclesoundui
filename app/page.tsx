@@ -277,16 +277,16 @@ export default function Home() {
               {t.nav.smartContainers}
             </button>
             <button
-              onClick={() => scrollToSection("mobile-containers")}
-              className="text-gray-700 hover:text-[#20b2aa] transition-colors"
-            >
-              {t.nav.mobileContainers}
-            </button>
-            <button
               onClick={() => scrollToSection("detectors")}
               className="text-gray-700 hover:text-[#20b2aa] transition-colors"
             >
               {t.nav.detectors}
+            </button>
+            <button
+              onClick={() => scrollToSection("mobile-containers")}
+              className="text-gray-700 hover:text-[#20b2aa] transition-colors"
+            >
+              {t.nav.mobileContainers}
             </button>
             <Button
               onClick={() => setLanguage(language === "cs" ? "en" : "cs")}
@@ -389,129 +389,149 @@ export default function Home() {
         </div>
       </section>
 
+{/* Detectors Section */}
+<section id="detectors" className="py-16 px-4 md:px-8 lg:px-16">
+  <div className="max-w-6xl mx-auto">
+    <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.detectors.title}</h2>
+    <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.detectors.subtitle}</h3>
+
+    <div className="flex flex-col md:grid md:grid-cols-2 gap-8 items-stretch"> {/* Změna na items-stretch */}
+      {/* Obrázek */}
+      <div className="relative w-full aspect-square md:aspect-[4/3] order-1 md:order-2"> {/* Přidán aspect ratio */}
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src={detectorImages[activeSlide.detectors]}
+            alt="Detectors"
+            fill
+            className="object-contain" 
+            priority
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
+        
+        {/* Navigační tlačítka */}
+        <div className="absolute inset-0 flex items-center justify-between px-2">
+          <button
+            onClick={() => handleSlideChange("detectors", "prev")}
+            className="bg-white/80 rounded-full p-2 hover:bg-white transition-colors z-20"
+          >
+            <ChevronLeft className="h-6 w-6 text-[#20b2aa]" />
+          </button>
+          <button
+            onClick={() => handleSlideChange("detectors", "next")}
+            className="bg-white/80 rounded-full p-2 hover:bg-white transition-colors z-20"
+          >
+            <ChevronRight className="h-6 w-6 text-[#20b2aa]" />
+          </button>
+        </div>
+
+        {/* Indikátory */}
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2 z-20">
+          {detectorImages.map((_, index) => (
+            <div
+              key={index}
+              className={`h-2 w-2 rounded-full cursor-pointer ${
+                activeSlide.detectors === index ? "bg-[#20b2aa]" : "bg-gray-300"
+              }`}
+              onClick={() => setActiveSlide(prev => ({
+                ...prev,
+                detectors: index
+              }))}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Textový obsah */}
+      <div className="order-2 md:order-1 flex flex-col justify-center"> {/* Přidáno zarovnání */}
+        <ul className="space-y-3">
+          {t.detectors.features.map((feature, index) => (
+            <li key={index} className="flex items-start">
+              <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#40e0d0] flex items-center justify-center mt-0.5">
+                <span className="text-white font-bold text-sm">{index + 1}</span>
+              </div>
+              <span className="ml-3 text-gray-700">{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-6 text-gray-700 font-medium">{t.detectors.conclusion}</p>
+        
+        <div className="mt-6">
+          <Button className="bg-[#20b2aa] hover:bg-[#48d1cc]" onClick={() => scrollToSection("contact")}>
+            {t.detectors.cta}
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
       {/* Mobile Containers Section */}
-      <section id="mobile-containers" className="py-16 px-4 md:px-8 lg:px-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.mobileContainers.title}</h2>
-          <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.mobileContainers.subtitle}</h3>
+<section id="mobile-containers" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
+  <div className="max-w-6xl mx-auto">
+    <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.mobileContainers.title}</h2>
+    <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.mobileContainers.subtitle}</h3>
 
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="order-2 md:order-1">
-              <ul className="space-y-3">
-                {t.mobileContainers.features.map((feature, index) => (
-                  <li key={index} className="flex items-start">
-                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#48d1cc] flex items-center justify-center mt-0.5">
-                      <span className="text-white font-bold text-sm">{index + 1}</span>
-                    </div>
-                    <span className="ml-3 text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="mt-6 text-gray-700 font-medium">{t.mobileContainers.conclusion}</p>
-
-              <Button className="mt-6 bg-[#20b2aa] hover:bg-[#48d1cc]" onClick={() => scrollToSection("contact")}>
-                {t.mobileContainers.cta}
-              </Button>
-            </div>
-
-            <div className="relative h-64 md:h-80 rounded-lg overflow-hidden bg-white shadow-md order-1 md:order-2">
-              <div className="absolute inset-0 flex items-center justify-center">
-              <Image
-  src={mobileContainerImages[activeSlide.mobileContainers]}
-  alt="Mobil Container"
-  fill
-  className="object-contain"
-/>
-              </div>
-              <div className="absolute inset-0 flex items-center">
-                <button
-                  onClick={() => handleSlideChange("mobileContainers", "prev")}
-                  className="absolute left-2 bg-white/80 rounded-full p-2 hover:bg-white transition-colors"
-                >
-                  <ChevronLeft className="h-6 w-6 text-[#20b2aa]" />
-                </button>
-                <button
-                  onClick={() => handleSlideChange("mobileContainers", "next")}
-                  className="absolute right-2 bg-white/80 rounded-full p-2 hover:bg-white transition-colors"
-                >
-                  <ChevronRight className="h-6 w-6 text-[#20b2aa]" />
-                </button>
-              </div>
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
-                {[0, 1].map((index) => (
-                  <div
-                    key={index}
-                    className={`h-2 w-2 rounded-full ${activeSlide.mobileContainers === index ? "bg-[#20b2aa]" : "bg-gray-300"}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+    <div className="grid md:grid-cols-2 gap-8 items-center">
+      {/* Obrázek - nyní na levé straně */}
+      <div className="relative h-64 md:h-80 rounded-lg overflow-hidden bg-white shadow-md order-1 md:order-1">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Image
+            src={mobileContainerImages[activeSlide.mobileContainers]}
+            alt="Mobil Container"
+            fill
+            className="object-contain"
+          />
         </div>
-      </section>
-
-      {/* Detectors Section */}
-      <section id="detectors" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.detectors.title}</h2>
-          <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.detectors.subtitle}</h3>
-
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="relative h-64 md:h-80 rounded-lg overflow-hidden bg-white shadow-md">
-              <div className="absolute inset-0 flex items-center justify-center">
-              <Image
-  src={detectorImages[activeSlide.detectors]}
-  alt="Detectors"
-  fill
-  className="object-contain"
-/>
-              </div>
-              <div className="absolute inset-0 flex items-center">
-                <button
-                  onClick={() => handleSlideChange("detectors", "prev")}
-                  className="absolute left-2 bg-white/80 rounded-full p-2 hover:bg-white transition-colors"
-                >
-                  <ChevronLeft className="h-6 w-6 text-[#20b2aa]" />
-                </button>
-                <button
-                  onClick={() => handleSlideChange("detectors", "next")}
-                  className="absolute right-2 bg-white/80 rounded-full p-2 hover:bg-white transition-colors"
-                >
-                  <ChevronRight className="h-6 w-6 text-[#20b2aa]" />
-                </button>
-              </div>
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
-                {[0, 1].map((index) => (
-                  <div
-                    key={index}
-                    className={`h-2 w-2 rounded-full ${activeSlide.detectors === index ? "bg-[#20b2aa]" : "bg-gray-300"}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <ul className="space-y-3">
-                {t.detectors.features.map((feature, index) => (
-                  <li key={index} className="flex items-start">
-                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#40e0d0] flex items-center justify-center mt-0.5">
-                      <span className="text-white font-bold text-sm">{index + 1}</span>
-                    </div>
-                    <span className="ml-3 text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="mt-6 text-gray-700 font-medium">{t.detectors.conclusion}</p>
-
-              <Button className="mt-6 bg-[#20b2aa] hover:bg-[#48d1cc]" onClick={() => scrollToSection("contact")}>
-                {t.detectors.cta}
-              </Button>
-            </div>
-          </div>
+        <div className="absolute inset-0 flex items-center">
+          <button
+            onClick={() => handleSlideChange("mobileContainers", "prev")}
+            className="absolute left-2 bg-white/80 rounded-full p-2 hover:bg-white transition-colors"
+          >
+            <ChevronLeft className="h-6 w-6 text-[#20b2aa]" />
+          </button>
+          <button
+            onClick={() => handleSlideChange("mobileContainers", "next")}
+            className="absolute right-2 bg-white/80 rounded-full p-2 hover:bg-white transition-colors"
+          >
+            <ChevronRight className="h-6 w-6 text-[#20b2aa]" />
+          </button>
         </div>
-      </section>
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
+          {[0, 1].map((index) => (
+            <div
+              key={index}
+              className={`h-2 w-2 rounded-full ${activeSlide.mobileContainers === index ? "bg-[#20b2aa]" : "bg-gray-300"}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Textový obsah - nyní na pravé straně */}
+      <div className="order-2 md:order-2">
+        <ul className="space-y-3">
+          {t.mobileContainers.features.map((feature, index) => (
+            <li key={index} className="flex items-start">
+              <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#48d1cc] flex items-center justify-center mt-0.5">
+                <span className="text-white font-bold text-sm">{index + 1}</span>
+              </div>
+              <span className="ml-3 text-gray-700">{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-6 text-gray-700 font-medium">{t.mobileContainers.conclusion}</p>
+
+        <Button className="mt-6 bg-[#20b2aa] hover:bg-[#48d1cc]" onClick={() => scrollToSection("contact")}>
+          {t.mobileContainers.cta}
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 
       {/* Contact Section */}
       <section id="contact" className="py-16 px-4 md:px-8 lg:px-16">
