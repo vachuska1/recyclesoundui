@@ -1,5 +1,6 @@
 "use client"
 
+
 import type React from "react"
 
 import { useState } from "react"
@@ -12,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { sendContactForm } from "@/app/actions"
+import Map from "@/components/Map"
 
 export default function Home() {
   const [language, setLanguage] = useState<"cs" | "en">("cs")
@@ -185,6 +187,27 @@ export default function Home() {
     })
   }
 
+  const smartContainerImages = [
+    "/smart/bio.webp",
+    "/smart/papir.webp",
+    "/smart/plast.webp",
+    "/smart/sklo.webp",
+    "/smart/smiseny.webp",
+    // ... další 3 fotky
+  ]
+
+  const mobileContainerImages = [
+    "/mobil/Mobil1.jpg",
+    "/mobil/Mobil2.jpg",
+  ]
+
+  const detectorImages = [
+    "/detector/waytronic1.webp",
+    "/detector/waytronic2.webp",
+  ]
+
+
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -285,21 +308,25 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4 md:px-8 lg:px-16">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-8">{t.hero.title}</h1>
-          <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
-            <Image
-              src="/placeholder.svg?height=400&width=1200"
-              alt="Recycling Hero Image"
-              fill
-              className="object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
+{/* Hero Section */}
+<section className="pt-32 pb-16 px-0">
+  <div className="w-full max-w-none mx-0">
+    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-8 px-4 md:px-8 lg:px-16">
+      {t.hero.title}
+    </h1>
+    <div className="relative w-full" style={{ paddingTop: '56.25%' }}> {/* 16:9 aspect ratio */}
+      <Image
+        src="/Animation/Animation.png"
+        alt="Recycling Hero Image"
+        fill
+        className="object-cover w-full"
+        priority
+        quality={100}
+        sizes="100vw"
+      />
+    </div>
+  </div>
+</section>
       {/* Smart Containers Section */}
       <section id="smart-containers" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
         <div className="max-w-6xl mx-auto">
@@ -309,12 +336,12 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="relative h-64 md:h-80 rounded-lg overflow-hidden bg-white shadow-md">
               <div className="absolute inset-0 flex items-center justify-center">
-                <Image
-                  src="/placeholder.svg?height=400&width=600"
-                  alt="Smart Container"
-                  fill
-                  className="object-cover"
-                />
+              <Image
+  src={smartContainerImages[activeSlide.smartContainers]}
+  alt="Smart Container"
+  fill
+  className="object-contain"
+/>
               </div>
               <div className="absolute inset-0 flex items-center">
                 <button
@@ -390,12 +417,12 @@ export default function Home() {
 
             <div className="relative h-64 md:h-80 rounded-lg overflow-hidden bg-white shadow-md order-1 md:order-2">
               <div className="absolute inset-0 flex items-center justify-center">
-                <Image
-                  src="/placeholder.svg?height=400&width=600"
-                  alt="Mobile Container"
-                  fill
-                  className="object-cover"
-                />
+              <Image
+  src={mobileContainerImages[activeSlide.mobileContainers]}
+  alt="Mobil Container"
+  fill
+  className="object-contain"
+/>
               </div>
               <div className="absolute inset-0 flex items-center">
                 <button
@@ -433,7 +460,12 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="relative h-64 md:h-80 rounded-lg overflow-hidden bg-white shadow-md">
               <div className="absolute inset-0 flex items-center justify-center">
-                <Image src="/placeholder.svg?height=400&width=600" alt="Alarm" fill className="object-cover" />
+              <Image
+  src={detectorImages[activeSlide.detectors]}
+  alt="Detectors"
+  fill
+  className="object-contain"
+/>
               </div>
               <div className="absolute inset-0 flex items-center">
                 <button
@@ -566,7 +598,7 @@ export default function Home() {
 
                 <div className="pt-4">
                   <div className="h-64 w-full rounded-lg bg-gray-200 flex items-center justify-center">
-                    <p className="text-gray-500">Map placeholder</p>
+                  <Map />
                   </div>
                 </div>
               </div>
@@ -577,33 +609,34 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-[#20b2aa] text-white py-8 px-4 md:px-8 lg:px-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <p className="font-bold text-xl">RECYCLESOUND</p>
-            </div>
+  <div className="max-w-6xl mx-auto">
+    <div className="flex flex-col md:flex-row justify-center md:justify-between items-center">
+      <div className="mb-4 md:mb-0 text-center md:text-left">
+        <p className="font-bold text-xl">RECYCLESOUND</p>
+      </div>
 
-            <div className="flex space-x-4">
-              <button onClick={() => scrollToSection("smart-containers")} className="hover:underline">
-                {t.nav.smartContainers}
-              </button>
-              <button onClick={() => scrollToSection("mobile-containers")} className="hover:underline">
-                {t.nav.mobileContainers}
-              </button>
-              <button onClick={() => scrollToSection("detectors")} className="hover:underline">
-                {t.nav.detectors}
-              </button>
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+        <button onClick={() => scrollToSection("smart-containers")} className="hover:underline">
+          {t.nav.smartContainers}
+        </button>
+        <button onClick={() => scrollToSection("mobile-containers")} className="hover:underline">
+          {t.nav.mobileContainers}
+        </button>
+        <button onClick={() => scrollToSection("detectors")} className="hover:underline">
+          {t.nav.detectors}
+        </button>
+      </div>
+    </div>
 
-          <div className="mt-6 text-center">
-            <p>
-              &copy; {new Date().getFullYear()} RECYCLESOUND.{" "}
-              {language === "cs" ? "Všechna práva vyhrazena." : "All rights reserved."}
-            </p>
-          </div>
-        </div>
-      </footer>
+    <div className="mt-6 text-center">
+      <p>
+        &copy; {new Date().getFullYear()} RECYCLESOUND.{" "}
+        {language === "cs" ? "Všechna práva vyhrazena." : "All rights reserved."}
+      </p>
+    </div>
+  </div>
+</footer>
+
     </main>
   )
 }

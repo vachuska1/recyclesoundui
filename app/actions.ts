@@ -1,51 +1,49 @@
-"use server"
+"use server";
 
-import { Resend } from "resend"
+import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "test_key")
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface ContactFormData {
-  name: string
-  email: string
-  phone: string
-  message: string
-  consent: boolean
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  consent: boolean;
 }
 
 export async function sendContactForm(formData: ContactFormData) {
-  if (!formData.name || !formData.email || !formData.phone || !formData.message || !formData.consent) {
-    throw new Error("All fields are required")
+  if (!formData.consent) {
+    throw new Error("Consent is required");
   }
 
   try {
-    // For local development, we'll just log the form data
-    console.log("Form data received:", formData)
+    // V produkčním prostředí odešleme e-mail
+    if (process.env.NODE_ENV === "production") {
+      const { data, error } = await resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: process.env.NEXT_PUBLIC_RESEND_EMAIL || 'odhadyvachuska@gmail.com',
+        subject: `Nový kontakt od ${formData.name}`,
+        html: `
+          <h1>Nová zpráva z kontaktního formuláře</h1>
+          <p><strong>Jméno:</strong> ${formData.name}</p>
+          <p><strong>Email:</strong> ${formData.email}</p>
+          <p><strong>Telefon:</strong> ${formData.phone}</p>
+          <p><strong>Zpráva:</strong> ${formData.message}</p>
+        `,
+      });
 
-    // In production, you would use Resend or another email service
-    // This is commented out since we don't have a real API key in development
-    /*
-    const { data, error } = await resend.emails.send({
-      from: 'onboarding@resend.dev',
-      to: 'odhadyvachuska@gmail.com',
-      subject: 'New Contact Form Submission',
-      html: `
-        <h1>New Contact Form Submission</h1>
-        <p><strong>Name:</strong> ${formData.name}</p>
-        <p><strong>Email:</strong> ${formData.email}</p>
-        <p><strong>Phone:</strong> ${formData.phone}</p>
-        <p><strong>Message:</strong> ${formData.message}</p>
-      `,
-    })
-
-    if (error) {
-      throw new Error(error.message)
+      if (error) {
+        throw new Error(error.message);
+      }
+    } else {
+      // V developmentu pouze logujeme
+      console.log("E-mail by byl odeslán s těmito daty:", formData);
     }
-    */
 
-    return { success: true }
+    return { success: true };
   } catch (error) {
-    console.error("Error sending email:", error)
-    throw new Error("Failed to send message")
+    console.error("Chyba při odesílání e-mailu:", error);
+    throw new Error("Failed to send message");
   }
 }
-
