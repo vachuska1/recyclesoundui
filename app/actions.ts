@@ -22,7 +22,7 @@ export async function sendContactForm(formData: ContactFormData) {
     if (process.env.NODE_ENV === "production") {
       const { data, error } = await resend.emails.send({
         from: 'onboarding@resend.dev',
-        to: process.env.NEXT_PUBLIC_RESEND_EMAIL || 'odhadyvachuska@gmail.com',
+        to: process.env.NEXT_PUBLIC_RESEND_EMAIL || 'aless.vachuska@seznam.cz',
         subject: `Nový kontakt od ${formData.name}`,
         html: `
           <h1>Nová zpráva z kontaktního formuláře</h1>
