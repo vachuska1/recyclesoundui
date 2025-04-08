@@ -60,7 +60,7 @@ export default function Home() {
       },
       detectors: {
         title: "Hlásiče",
-        subtitle: "Udržitelná budoucnost díky modernímu vzdělávání o třídění a snižování odpadu",
+        subtitle: "Moderní osvěta s umístěním designových hlásičů na veřejné prostranství, skrytě i do kontejnerů na tříděný odpad",
         features: [
           "Mobilita – umožňuje flexibilní a operativní umístění hlásičů dle potřeby",
           "Databáze nahrávek – široká škála vlastních veselých vzdělávacích informací v hlasech známých osobností",
@@ -126,7 +126,7 @@ export default function Home() {
       },
       detectors: {
         title: "Alarms",
-        subtitle: "Sustainable future thanks to modern education about sorting and reducing waste",
+        subtitle: "Modern awareness with the placement of designer detectors in public areas, hidden in containers for sorted waste",
         features: [
           "Mobility – allows flexible and operational placement of the alarms, as needed",
           "Recording database – a wide range of own cheerful educational information in the voices of well-known personalities",
@@ -205,6 +205,35 @@ export default function Home() {
     "/detector/waytronic1.webp",
     "/detector/waytronic2.webp",
   ]
+
+
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+
+const handleAudioToggle = (url: string) => {
+  // Pokud už hraje tento soubor, pauzneme
+  if (currentAudio?.src.endsWith(url)) {
+    if (currentAudio.paused) {
+      currentAudio.play();
+    } else {
+      currentAudio.pause();
+    }
+    return;
+  }
+
+  // Jinak zastavíme aktuální a spustíme nový
+  if (currentAudio) {
+    currentAudio.pause();
+  }
+
+  const newAudio = new Audio(url);
+  newAudio.play();
+  setCurrentAudio(newAudio);
+
+  newAudio.onended = () => {
+    setCurrentAudio(null);
+  };
+};
+
 
 
 
@@ -309,9 +338,9 @@ export default function Home() {
       </nav>
 
 {/* Hero Section */}
-<section className="pt-32 pb-16 px-0">
-  <div className="w-full max-w-none mx-0">
-    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-8 px-4 md:px-8 lg:px-16">
+<section className="pt-32 pb-16 px-4 sm:px-6">
+  <div className="mx-auto w-full md:w-3/4 lg:w-3/4 xl:w-3/4 2xl:w-3/4"> {/* 75% width na desktopu */}
+    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-8">
       {t.hero.title}
     </h1>
     <div className="relative w-full" style={{ paddingTop: '56.25%' }}> {/* 16:9 aspect ratio */}
@@ -319,16 +348,16 @@ export default function Home() {
         src="/Animation/Animation.png"
         alt="Recycling Hero Image"
         fill
-        className="object-cover w-full"
+        className="object-cover"
         priority
         quality={100}
-        sizes="100vw"
+        sizes="(max-width: 768px) 100vw, 75vw"
       />
     </div>
   </div>
 </section>
       {/* Smart Containers Section */}
-      <section id="smart-containers" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
+      <section id="smart-containers" className="py-16 px-4 md:px-8 lg:px-16">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.smartContainers.title}</h2>
           <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.smartContainers.subtitle}</h3>
@@ -390,7 +419,7 @@ export default function Home() {
       </section>
 
 {/* Detectors Section */}
-<section id="detectors" className="py-16 px-4 md:px-8 lg:px-16">
+<section id="detectors" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
   <div className="max-w-6xl mx-auto">
     <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.detectors.title}</h2>
     <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.detectors.subtitle}</h3>
@@ -409,6 +438,41 @@ export default function Home() {
           />
         </div>
         
+        {/* Audio tlačítka - nyní v horní části */}
+        <div className="absolute top-4 left-0 right-0 flex justify-center gap-4 z-20">
+          {[1, 2, 3].map((num) => (
+            <button
+              key={num}
+              onClick={() => handleAudioToggle(`/audio/sample${num}.mp3`)}
+              className={`bg-white/90 hover:bg-white backdrop-blur-sm rounded-full p-2 md:p-3 transition-all
+                         shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center
+                         ${currentAudio?.src.endsWith(`sample${num}.mp3`) && !currentAudio?.paused 
+                           ? 'ring-2 ring-[#20b2aa]' 
+                           : ''}`}
+            >
+              {currentAudio?.src.endsWith(`sample${num}.mp3`) && !currentAudio?.paused ? (
+                <svg
+                  className="w-5 h-5 md:w-6 md:h-6 text-[#ff0000]"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+              ) : (
+                <svg
+                  className="w-5 h-5 md:w-6 md:h-6 text-[#ff0000]"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+              <span className="sr-only">Ukázka {num}</span>
+            </button>
+          ))}
+        </div>
+
+
         {/* Navigační tlačítka */}
         <div className="absolute inset-0 flex items-center justify-between px-2">
           <button
@@ -468,7 +532,7 @@ export default function Home() {
 </section>
 
       {/* Mobile Containers Section */}
-<section id="mobile-containers" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
+<section id="mobile-containers" className="py-16 px-4 md:px-8 lg:px-16">
   <div className="max-w-6xl mx-auto">
     <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.mobileContainers.title}</h2>
     <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.mobileContainers.subtitle}</h3>
@@ -534,7 +598,7 @@ export default function Home() {
 
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 px-4 md:px-8 lg:px-16">
+      <section id="contact" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-8 text-center">{t.contact.title}</h2>
 
@@ -639,11 +703,11 @@ export default function Home() {
         <button onClick={() => scrollToSection("smart-containers")} className="hover:underline">
           {t.nav.smartContainers}
         </button>
-        <button onClick={() => scrollToSection("mobile-containers")} className="hover:underline">
-          {t.nav.mobileContainers}
-        </button>
         <button onClick={() => scrollToSection("detectors")} className="hover:underline">
           {t.nav.detectors}
+        </button>
+        <button onClick={() => scrollToSection("mobile-containers")} className="hover:underline">
+          {t.nav.mobileContainers}
         </button>
       </div>
     </div>
