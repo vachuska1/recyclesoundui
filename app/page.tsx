@@ -357,7 +357,7 @@ const handleAudioToggle = (url: string) => {
   </div>
 </section>
       {/* Smart Containers Section */}
-      <section id="smart-containers" className="py-16 px-4 md:px-8 lg:px-16">
+      <section id="smart-containers" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.smartContainers.title}</h2>
           <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.smartContainers.subtitle}</h3>
@@ -419,7 +419,7 @@ const handleAudioToggle = (url: string) => {
       </section>
 
 {/* Detectors Section */}
-<section id="detectors" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
+<section id="detectors" className="py-16 px-4 md:px-8 lg:px-16">
   <div className="max-w-6xl mx-auto">
     <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.detectors.title}</h2>
     <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.detectors.subtitle}</h3>
@@ -439,38 +439,50 @@ const handleAudioToggle = (url: string) => {
         </div>
         
         {/* Audio tlačítka - nyní v horní části */}
-        <div className="absolute top-4 left-0 right-0 flex justify-center gap-4 z-20">
-          {[1, 2, 3].map((num) => (
-            <button
-              key={num}
-              onClick={() => handleAudioToggle(`/audio/sample${num}.mp3`)}
-              className={`bg-white/90 hover:bg-white backdrop-blur-sm rounded-full p-2 md:p-3 transition-all
-                         shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center
-                         ${currentAudio?.src.endsWith(`sample${num}.mp3`) && !currentAudio?.paused 
-                           ? 'ring-2 ring-[#20b2aa]' 
-                           : ''}`}
+<div className="absolute top-4 left-0 right-0 flex justify-center gap-4 z-20">
+  {[1, 2, 3].map((num) => (
+    <button
+      key={num}
+      onClick={() => handleAudioToggle(`/audio/sample${num}.mp3`)}
+      className={`bg-white/90 hover:bg-white backdrop-blur-sm rounded-full p-2 md:p-3 transition-all
+                 shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center
+                 ${currentAudio?.src.endsWith(`sample${num}.mp3`) && !currentAudio?.paused 
+                   ? 'ring-2 ring-[#20b2aa] animate-pulse' 
+                   : ''}`}
+      aria-label={`Přehrát ukázku ${num}`}
+    >
+      <div className="relative">
+        {currentAudio?.src.endsWith(`sample${num}.mp3`) && !currentAudio?.paused ? (
+          <>
+            <svg
+              className="w-12 h-12 md:w-12 md:h-12 text-[#20b2aa]"
+              fill="currentColor"
+              viewBox="0 0 24 24"
             >
-              {currentAudio?.src.endsWith(`sample${num}.mp3`) && !currentAudio?.paused ? (
-                <svg
-                  className="w-5 h-5 md:w-6 md:h-6 text-[#ff0000]"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                </svg>
-              ) : (
-                <svg
-                  className="w-5 h-5 md:w-6 md:h-6 text-[#ff0000]"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              )}
-              <span className="sr-only">Ukázka {num}</span>
-            </button>
-          ))}
-        </div>
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            </svg>
+            <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 whitespace-nowrap text-xs font-medium text-gray-700">
+              ..........
+            </span>
+          </>
+        ) : (
+          <>
+            <svg
+              className="w-12 h-12 md:w-12 md:h-12 text-[#20b2aa]"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 whitespace-nowrap text-xs font-small text-gray-400">
+              Audio {num}
+            </span>
+          </>
+        )}
+      </div>
+    </button>
+  ))}
+</div>
 
 
         {/* Navigační tlačítka */}
@@ -532,7 +544,7 @@ const handleAudioToggle = (url: string) => {
 </section>
 
       {/* Mobile Containers Section */}
-<section id="mobile-containers" className="py-16 px-4 md:px-8 lg:px-16">
+<section id="mobile-containers" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
   <div className="max-w-6xl mx-auto">
     <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-2">{t.mobileContainers.title}</h2>
     <h3 className="text-xl md:text-2xl font-medium text-gray-700 mb-8">{t.mobileContainers.subtitle}</h3>
@@ -598,7 +610,7 @@ const handleAudioToggle = (url: string) => {
 
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 px-4 md:px-8 lg:px-16 bg-gray-50">
+      <section id="contact" className="py-16 px-4 md:px-8 lg:px-16">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-[#20b2aa] mb-8 text-center">{t.contact.title}</h2>
 
