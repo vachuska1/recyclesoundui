@@ -2,25 +2,46 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
+  console.log('Email request received');
+  
   try {
-    const { to, subject, html, name, email, phone, message } = await request.json();
+    const body = await request.json();
+    console.log('Request body:', JSON.stringify(body, null, 2));
+    
+    const { to, subject, html, name, email, phone, message } = body;
 
-    // In development, use ethereal.email for testing
+    // Configuration for development (ethereal.email) and production
     let transporter: any;
     let from: string;
+    let isProduction = process.env.NODE_ENV === 'production';
 
-    if (process.env.NODE_ENV === 'production') {
-      // Production configuration with provided credentials
+    if (isProduction) {
+      console.log('Using production email settings');
+      
+      // Get SMTP settings from environment variables
+      const smtpHost = process.env.SMTP_HOST || 'smtp.seznam.cz';
+      const smtpPort = parseInt(process.env.SMTP_PORT || '465');
+      const smtpUser = process.env.SMTP_USER || 'vachuska@ekostat.cz';
+      const smtpPass = process.env.SMTP_PASS || 'Vaclav2025.';
+      const smtpFrom = process.env.SMTP_FROM || 'RecycleSound Contact Form <vachuska@ekostat.cz>';
+      
+      console.log(`Connecting to SMTP: ${smtpUser}@${smtpHost}:${smtpPort}`);
+      
       transporter = nodemailer.createTransport({
-        host: 'smtp.seznam.cz',
-        port: 465,
-        secure: true,
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465, // true for 465, false for other ports
         auth: {
-          user: 'vachuska@ekostat.cz',
-          pass: 'Vaclav2025.'
+          user: smtpUser,
+          pass: smtpPass
         },
+        tls: {
+          // Do not fail on invalid certs
+          rejectUnauthorized: false
+        }
       });
-      from = '\"RecycleSound Contact Form\" <vachuska@ekostat.cz>';
+      
+      from = smtpFrom;
     } else {
       // Development configuration (ethereal.email for testing)
       const testAccount = await nodemailer.createTestAccount();

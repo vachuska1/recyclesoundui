@@ -11,17 +11,16 @@ interface EmailOptions {
 }
 
 export async function sendEmail({ to, subject, html, ...data }: EmailOptions) {
-  try {
-    // In development, just log the email
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Email would be sent to:', to);
-      console.log('Subject:', subject);
-      console.log('Content:', html);
-      return { success: true };
-    }
+  const apiUrl = process.env.NODE_ENV === 'production'
+    ? 'https://recyclesoundui.vercel.app/api/send-email'
+    : '/api/send-email';
 
-    // In production, use a serverless function
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/send-email`, {
+  console.log(`Sending email via: ${apiUrl}`);
+  console.log('To:', to);
+  console.log('Subject:', subject);
+
+  try {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -34,14 +33,18 @@ export async function sendEmail({ to, subject, html, ...data }: EmailOptions) {
       }),
     });
 
+    const responseData = await response.json().catch(() => ({}));
+    
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to send email');
+      console.error('Email API error:', response.status, responseData);
+      throw new Error(responseData.error || `Failed to send email: ${response.statusText}`);
     }
 
-    return await response.json();
+    console.log('Email sent successfully:', responseData);
+    return { success: true, ...responseData };
   } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to send email');
+    const errorMessage = error instanceof Error ? error.message : 'Failed to send email';
+    console.error('Error in sendEmail:', errorMessage, error);
+    throw new Error(errorMessage);
   }
 }
