@@ -655,6 +655,8 @@ const handleAudioToggle = (url: string) => {
                       body: JSON.stringify(formData),
                     });
 
+                    const responseData = await response.json();
+                    
                     if (response.ok) {
                       toast({
                         title: language === "cs" ? "Úspěch" : "Success",
@@ -671,15 +673,19 @@ const handleAudioToggle = (url: string) => {
                         consent: false,
                       });
                     } else {
-                      throw new Error('Failed to send email');
+                      // Handle API errors with details
+                      const errorMessage = responseData.details || responseData.error || 'Failed to send email';
+                      console.error('API Error:', responseData);
+                      throw new Error(errorMessage);
                     }
-                  } catch (error) {
+                  } catch (error: unknown) {
                     console.error('Error:', error);
+                    const errorMessage = error instanceof Error ? error.message : '';
                     toast({
                       title: language === "cs" ? "Chyba" : "Error",
                       description: language === "cs"
-                        ? "Nepodařilo se odeslat zprávu. Zkuste to prosím znovu."
-                        : "Failed to send message. Please try again.",
+                        ? `Nepodařilo se odeslat zprávu. ${errorMessage || 'Zkuste to prosím znovu.'}`
+                        : `Failed to send message. ${errorMessage || 'Please try again.'}`,
                       variant: "destructive",
                     });
                   }
