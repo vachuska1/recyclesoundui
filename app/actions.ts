@@ -1,6 +1,6 @@
 "use server";
 
-import { sendEmail } from '@/lib/email';
+import { Resend } from 'resend';
 
 interface ContactFormData {
   name: string;
@@ -9,6 +9,8 @@ interface ContactFormData {
   message: string;
   consent: boolean;
 }
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendContactForm(formData: ContactFormData) {
   if (!formData.consent) {
@@ -25,17 +27,18 @@ export async function sendContactForm(formData: ContactFormData) {
       <p>${formData.message}</p>
     `;
 
-    // Always try to send the email in both development and production
-    // In development, it will use ethereal.email for testing
-    await sendEmail({
-      to: 'aless.vachuska@seznam.cz', // Your recipient email
+    const { data, error } = await resend.emails.send({
+      from: 'Recyclesound <noreply@ekostat.cz>',
+      to: 'vachuska@ekostat.cz',
       subject: `Nový kontakt od ${formData.name}`,
       html: emailHtml,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      message: formData.message
+      replyTo: formData.email,
     });
+
+    if (error) {
+      console.error('Resend error:', error);
+      throw new Error('Nepodařilo se odeslat zprávu přes emailovou službu.');
+    }
 
     return { success: true };
   } catch (error) {
