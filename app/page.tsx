@@ -657,11 +657,19 @@ const handleAudioToggle = (url: string) => {
 
                     let responseData;
                     try {
-                      responseData = await response.json();
-                    } catch (jsonError) {
-                      const text = await response.text();
-                      console.error('Failed to parse JSON response:', text);
-                      throw new Error('Invalid response from server');
+                      // Clone the response before reading it
+                      const responseClone = response.clone();
+                      try {
+                        responseData = await response.json();
+                      } catch (jsonError) {
+                        // If JSON parsing fails, try to read as text
+                        const text = await responseClone.text();
+                        console.error('Failed to parse JSON response. Raw response:', text);
+                        throw new Error('Invalid response from server');
+                      }
+                    } catch (error) {
+                      console.error('Error processing response:', error);
+                      throw error;
                     }
                     
                     if (response.ok) {
