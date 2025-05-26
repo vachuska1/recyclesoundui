@@ -30,11 +30,11 @@ export async function POST(request: Request) {
       console.log('Sending email using Resend');
       
       const { data, error } = await resend.emails.send({
-        from: 'RecycleSound <onboarding@resend.dev>',
-        to: to || 'aless.vachuska@seznam.cz',
+        from: 'RecycleSound <aless.vachuska@seznam.cz>',
+        to: 'vachuska@ekostat.cz',
         subject: subject || 'New Contact Form Submission',
         html: emailContent,
-        replyTo: email || 'no-reply@recyclesound.com'
+        replyTo: 'aless.vachuska@seznam.cz'
       });
 
       if (error) {
@@ -48,7 +48,9 @@ export async function POST(request: Request) {
     // In development, log the email
     else {
       console.log('Development mode - email would be sent with content:');
-      console.log('To:', to || 'aless.vachuska@seznam.cz');
+      console.log('From: RecycleSound <aless.vachuska@seznam.cz>');
+      console.log('To: vachuska@ekostat.cz');
+      console.log('Reply-To: aless.vachuska@seznam.cz');
       console.log('Subject:', subject || 'New Contact Form Submission');
       console.log('Content:', emailContent);
       
