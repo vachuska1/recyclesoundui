@@ -202,8 +202,9 @@ export default function Home() {
   ]
 
   const detectorImages = [
-    "/detector/waytronic1.webp",
-    "/detector/waytronic2.webp",
+    "/detector/Hlasic2.png",
+    "/detector/Hlasic3.png",
+    "/detector/Hlasic1.png",
   ]
 
 
