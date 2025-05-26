@@ -82,10 +82,28 @@ export async function POST(request: Request) {
     }
     
     return NextResponse.json({ success: true, messageId: info.messageId });
-  } catch (error) {
-    console.error('Error sending email:', error);
+  } catch (error: any) {
+    // Log the complete error details
+    console.error('Full error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      response: error.response,
+      command: error.command,
+      responseCode: error.responseCode,
+      responseMessage: error.responseMessage
+    });
+
+    // Return detailed error information
     return NextResponse.json(
-      { error: 'Failed to send email' },
+      { 
+        error: 'Failed to send email',
+        details: {
+          message: error.message,
+          code: error.code,
+          response: error.response
+        }
+      },
       { status: 500 }
     );
   }

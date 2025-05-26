@@ -33,11 +33,28 @@ export async function sendEmail({ to, subject, html, ...data }: EmailOptions) {
       }),
     });
 
-    const responseData = await response.json().catch(() => ({}));
+    let responseData;
+    try {
+      responseData = await response.json();
+    } catch (e) {
+      const text = await response.text();
+      console.error('Failed to parse JSON response:', text);
+      responseData = { error: 'Invalid server response', details: text };
+    }
     
     if (!response.ok) {
-      console.error('Email API error:', response.status, responseData);
-      throw new Error(responseData.error || `Failed to send email: ${response.statusText}`);
+      console.error('Email API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        response: responseData
+      });
+      
+      const errorMessage = responseData?.details?.message || 
+                          responseData?.error || 
+                          `Failed to send email: ${response.statusText}`;
+      const error = new Error(errorMessage);
+      (error as any).response = responseData;
+      throw error;
     }
 
     console.log('Email sent successfully:', responseData);
