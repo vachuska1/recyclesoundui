@@ -632,13 +632,10 @@ const handleAudioToggle = (url: string) => {
               <h3 className="text-xl font-semibold mb-4">{t.contact.contactUs}</h3>
 
               <form 
-                action="mailto:vachuska@ekostat.cz" 
-                method="post" 
-                encType="text/plain"
-                className="space-y-4"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  
                   if (!formData.consent) {
-                    e.preventDefault();
                     toast({
                       title: language === "cs" ? "Chyba" : "Error",
                       description: language === "cs"
@@ -646,8 +643,48 @@ const handleAudioToggle = (url: string) => {
                         : "Please confirm your consent to process personal data",
                       variant: "destructive",
                     });
+                    return;
+                  }
+
+                  try {
+                    const response = await fetch('/api/send-email', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(formData),
+                    });
+
+                    if (response.ok) {
+                      toast({
+                        title: language === "cs" ? "Úspěch" : "Success",
+                        description: language === "cs" 
+                          ? "Zpráva byla úspěšně odeslána"
+                          : "Message sent successfully",
+                      });
+                      // Reset form
+                      setFormData({
+                        name: "",
+                        email: "",
+                        phone: "",
+                        message: "",
+                        consent: false,
+                      });
+                    } else {
+                      throw new Error('Failed to send email');
+                    }
+                  } catch (error) {
+                    console.error('Error:', error);
+                    toast({
+                      title: language === "cs" ? "Chyba" : "Error",
+                      description: language === "cs"
+                        ? "Nepodařilo se odeslat zprávu. Zkuste to prosím znovu."
+                        : "Failed to send message. Please try again.",
+                      variant: "destructive",
+                    });
                   }
                 }}
+                className="space-y-4"
               >
                 <div>
                   <Label htmlFor="name">{t.contact.name}</Label>
