@@ -18,12 +18,20 @@ export async function POST(request: Request) {
     if (isProduction) {
       console.log('Using production email settings');
       
-      // Get SMTP settings from environment variables
-      const smtpHost = process.env.SMTP_HOST || 'smtp.seznam.cz';
-      const smtpPort = parseInt(process.env.SMTP_PORT || '465');
-      const smtpUser = process.env.SMTP_USER || 'vachuska@ekostat.cz';
-      const smtpPass = process.env.SMTP_PASS || 'Vaclav2025.';
-      const smtpFrom = process.env.SMTP_FROM || 'RecycleSound Contact Form <vachuska@ekostat.cz>';
+      // SMTP settings for ekostat.cz
+      const smtpHost = 'mail.ekostat.cz';  // Your email provider's SMTP server
+      const smtpPort = 465;  // Standard secure port for SMTP
+      const smtpUser = 'vachuska@ekostat.cz';  // Your full email
+      const smtpPass = 'Vaclav2025.';  // Your email password
+      const smtpFrom = 'RecycleSound Contact Form <vachuska@ekostat.cz>';  // Sender name and email
+      
+      console.log('SMTP Configuration:', {
+        host: smtpHost,
+        port: smtpPort,
+        user: smtpUser,
+        // Don't log the password
+        from: smtpFrom
+      });
       
       console.log(`Connecting to SMTP: ${smtpUser}@${smtpHost}:${smtpPort}`);
       
@@ -44,21 +52,32 @@ export async function POST(request: Request) {
       from = smtpFrom;
     } else {
       // Development configuration (ethereal.email for testing)
-      const testAccount = await nodemailer.createTestAccount();
-      transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
-      from = `"Test Sender" <${testAccount.user}>`;
+      console.log('Setting up development email with ethereal.email');
       
-      console.log('Test email account created:');
-      console.log('Email:', testAccount.user);
-      console.log('Password:', testAccount.pass);
+      try {
+        const testAccount = await nodemailer.createTestAccount();
+        console.log('Ethereal test account created');
+        
+        transporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false, // true for 465, false for other ports
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+          },
+        });
+        
+        from = `"RecycleSound Dev" <${testAccount.user}>`;
+        
+        console.log('Test email account created:');
+        console.log('Email:', testAccount.user);
+        console.log('Password:', testAccount.pass);
+        console.log('Webmail URL: https://ethereal.email/');
+      } catch (error) {
+        console.error('Failed to create test account:', error);
+        throw new Error('Failed to set up test email account');
+      }
     }
 
     // Send mail with defined transport object
