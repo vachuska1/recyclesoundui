@@ -174,7 +174,9 @@ export default function Home() {
     direction: "prev" | "next",
   ) => {
     setActiveSlide((prev) => {
-      const maxSlides = section === "smartContainers" ? 5 : 2
+      const maxSlides = 
+        section === "smartContainers" ? 5 : 
+        section === "detectors" ? 3 : 2;
       let newIndex = prev[section]
 
       if (direction === "next") {
