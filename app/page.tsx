@@ -655,7 +655,14 @@ const handleAudioToggle = (url: string) => {
                       body: JSON.stringify(formData),
                     });
 
-                    const responseData = await response.json();
+                    let responseData;
+                    try {
+                      responseData = await response.json();
+                    } catch (jsonError) {
+                      const text = await response.text();
+                      console.error('Failed to parse JSON response:', text);
+                      throw new Error('Invalid response from server');
+                    }
                     
                     if (response.ok) {
                       toast({
@@ -674,20 +681,39 @@ const handleAudioToggle = (url: string) => {
                       });
                     } else {
                       // Handle API errors with details
-                      const errorMessage = responseData.details || responseData.error || 'Failed to send email';
+                      const errorDetails = [];
+                      if (responseData.details) errorDetails.push(responseData.details);
+                      if (responseData.error) errorDetails.push(responseData.error);
+                      if (responseData.code) errorDetails.push(`Code: ${responseData.code}`);
+                      
+                      const errorMessage = errorDetails.length > 0 
+                        ? errorDetails.join(' - ') 
+                        : 'Failed to send email';
+                        
                       console.error('API Error:', responseData);
                       throw new Error(errorMessage);
                     }
                   } catch (error: unknown) {
                     console.error('Error:', error);
-                    const errorMessage = error instanceof Error ? error.message : '';
+                    let errorMessage = '';
+                    
+                    if (error instanceof Error) {
+                      errorMessage = error.message;
+                    } else if (typeof error === 'string') {
+                      errorMessage = error;
+                    }
+                    
                     toast({
                       title: language === "cs" ? "Chyba" : "Error",
                       description: language === "cs"
                         ? `Nepodařilo se odeslat zprávu. ${errorMessage || 'Zkuste to prosím znovu.'}`
                         : `Failed to send message. ${errorMessage || 'Please try again.'}`,
                       variant: "destructive",
+                      duration: 10000, // Show for 10 seconds
                     });
+                    
+                    // Log the full error to the console for debugging
+                    console.error('Full error details:', error);
                   }
                 }}
                 className="space-y-4"

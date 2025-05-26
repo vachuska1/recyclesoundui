@@ -11,22 +11,58 @@ const smtpConfig = {
     pass: process.env.EMAIL_PASSWORD,
   },
   // Add debug and logger for more detailed error information
-  debug: true,
-  logger: true
+  debug: process.env.NODE_ENV !== 'production',
+  logger: process.env.NODE_ENV !== 'production',
+  // Add connection timeout
+  connectionTimeout: 10000, // 10 seconds
+  // Add TLS options
+  tls: {
+    // Do not fail on invalid certs
+    rejectUnauthorized: false
+  }
 };
+
+// Helper function to safely parse JSON
+async function safeJsonParse(response: Response) {
+  try {
+    return await response.json();
+  } catch (error) {
+    const text = await response.text();
+    console.error('Failed to parse JSON response:', text);
+    return { error: 'Invalid response from server', details: text };
+  }
+}
 
 export async function POST(request: Request) {
   console.log('Email sending process started');
   
   try {
-    const { name, email, phone, message } = await request.json();
+    let requestBody;
+    try {
+      requestBody = await request.json();
+    } catch (error) {
+      console.error('Invalid JSON in request:', error);
+      return NextResponse.json(
+        { error: 'Invalid request body', details: 'Request body must be valid JSON' },
+        { status: 400 }
+      );
+    }
+
+    const { name, email, phone, message } = requestBody;
     console.log('Request data received:', { name, email, phone: phone ? 'provided' : 'not provided' });
 
     // Validate required fields
     if (!name || !email || !message) {
       console.error('Missing required fields');
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { 
+          error: 'Missing required fields',
+          missingFields: {
+            name: !name,
+            email: !email,
+            message: !message
+          }
+        },
         { status: 400 }
       );
     }
@@ -38,15 +74,25 @@ export async function POST(request: Request) {
     // Verify connection configuration
     try {
       console.log('Verifying SMTP connection...');
-      await transporter.verify();
-      console.log('Server is ready to take our messages');
+      await new Promise<void>((resolve, reject) => {
+        transporter.verify((error) => {
+          if (error) {
+            console.error('SMTP verify error:', error);
+            reject(error);
+          } else {
+            console.log('Server is ready to take our messages');
+            resolve();
+          }
+        });
+      });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during SMTP verification';
       console.error('SMTP connection verification failed:', error);
       return NextResponse.json(
         { 
           error: 'SMTP connection failed',
-          details: errorMessage
+          details: errorMessage,
+          code: (error as any).code
         },
         { status: 500 }
       );
@@ -80,12 +126,22 @@ export async function POST(request: Request) {
     });
 
     // Send mail with defined transport object
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Message sent:', info.messageId);
+    console.log('Sending email...');
+    const info = await new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error sending email:', error);
+          reject(error);
+        } else {
+          console.log('Message sent:', info.messageId);
+          resolve(info);
+        }
+      });
+    });
 
     return NextResponse.json({ 
       success: true,
-      messageId: info.messageId 
+      messageId: (info as any).messageId 
     });
 
   } catch (error: unknown) {
