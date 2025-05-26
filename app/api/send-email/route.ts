@@ -1,8 +1,20 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-// Initialize Resend with your API key
-const resend = new Resend(process.env.RESEND_API_KEY || 're_HNhPxssG_G8KWYVDSyNJihjRYzMAWggkS'); // Replace with your actual Resend API key
+// SMTP configuration for ekostat.cz
+const smtpConfig = {
+  host: 'mail.ekostat.cz',
+  port: 465,
+  secure: true, // true for 465, false for other ports
+  auth: {
+    user: 'vachuska@ekostat.cz',
+    pass: 'Vaclav2025.'
+  },
+  tls: {
+    // Do not fail on invalid certs
+    rejectUnauthorized: false
+  }
+};
 
 export async function POST(request: Request) {
   console.log('Email request received');
@@ -11,13 +23,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Request body:', JSON.stringify(body, null, 2));
     
-    const { to, subject, html, name, email, phone, message } = body;
+    const { subject, name, email, phone, message } = body;
 
-    // Determine if we're in production or development
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    // Set up email content
-    const emailContent = html || `
+    // Create reusable transporter object
+    const transporter = nodemailer.createTransport(smtpConfig);
+
+    // Email content
+    const emailContent = `
       <h1>New Contact Form Submission</h1>
       <p><strong>Name:</strong> ${name || 'Not provided'}</p>
       <p><strong>Email:</strong> ${email || 'Not provided'}</p>
@@ -25,43 +37,22 @@ export async function POST(request: Request) {
       <p><strong>Message:</strong> ${message || 'Not provided'}</p>
     `;
 
-    // In production, send real email using Resend
-    if (isProduction) {
-      console.log('Sending email using Resend');
-      
-      const { data, error } = await resend.emails.send({
-        from: 'RecycleSound <aless.vachuska@seznam.cz>',
-        to: 'vachuska@ekostat.cz',
-        subject: subject || 'New Contact Form Submission',
-        html: emailContent,
-        replyTo: 'aless.vachuska@seznam.cz'
-      });
+    // Send mail with defined transport object
+    const info = await transporter.sendMail({
+      from: 'RecycleSound <vachuska@ekostat.cz>', // Sender address
+      to: 'aless.vachuska@seznam.cz', // Send to your email
+      replyTo: 'vachuska@ekostat.cz', // Replies will go to ekostat.cz
+      subject: subject || 'New Contact Form Submission',
+      html: emailContent
+    });
 
-      if (error) {
-        console.error('Resend error:', error);
-        throw new Error(error.message);
-      }
-
-      console.log('Email sent via Resend:', data);
-      return NextResponse.json({ success: true, messageId: data?.id });
-    } 
-    // In development, log the email
-    else {
-      console.log('Development mode - email would be sent with content:');
-      console.log('From: RecycleSound <aless.vachuska@seznam.cz>');
-      console.log('To: vachuska@ekostat.cz');
-      console.log('Reply-To: aless.vachuska@seznam.cz');
-      console.log('Subject:', subject || 'New Contact Form Submission');
-      console.log('Content:', emailContent);
-      
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Email logged (not sent in development)',
-        preview: emailContent
-      });
-    }
+    console.log('Message sent: %s', info.messageId);
     
-    return NextResponse.json({ success: true, message: 'Email processed' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Email sent successfully',
+      messageId: info.messageId
+    });
   } catch (error: any) {
     // Log the complete error details
     console.error('Full error details:', {
