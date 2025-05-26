@@ -647,7 +647,10 @@ const handleAudioToggle = (url: string) => {
                   }
 
                   try {
+                    console.log('Submitting form data:', formData);
                     const response = await sendContactForm(formData);
+                    console.log('Server action response:', response);
+                    
                     if (response.success) {
                       toast({
                         title: language === "cs" ? "Úspěch" : "Success",
@@ -664,7 +667,10 @@ const handleAudioToggle = (url: string) => {
                         consent: false,
                       });
                     } else {
-                      throw new Error('Failed to send email');
+                      // Show the specific error from the server action
+                      const errorMsg = response.error || 'Failed to send email';
+                      console.error('Email sending failed:', errorMsg);
+                      throw new Error(errorMsg);
                     }
                   } catch (error: unknown) {
                     console.error('Error:', error);
