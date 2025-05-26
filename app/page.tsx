@@ -249,7 +249,7 @@ const handleAudioToggle = (url: string) => {
     setFormData((prev) => ({ ...prev, consent: checked }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!formData.consent) {
@@ -264,26 +264,36 @@ const handleAudioToggle = (url: string) => {
       return
     }
 
-    try {
-      await sendContactForm(formData)
-      toast({
-        title: language === "cs" ? "Úspěch" : "Success",
-        description: t.contact.success,
-      })
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        message: "",
-        consent: false,
-      })
-    } catch (error) {
-      toast({
-        title: language === "cs" ? "Chyba" : "Error",
-        description: t.contact.error,
-        variant: "destructive",
-      })
-    }
+    // Create email body
+    const emailBody = `
+      Jméno: ${formData.name}
+      Email: ${formData.email}
+      Telefon: ${formData.phone}
+      Zpráva: ${formData.message}
+    `
+
+    // Create mailto link
+    const mailtoLink = `mailto:vachuska@ekostat.cz?subject=Nová zpráva z webu RecycleSound&body=${encodeURIComponent(emailBody)}`
+    
+    // Open default email client
+    window.location.href = mailtoLink
+    
+    // Show success message
+    toast({
+      title: language === "cs" ? "Úspěch" : "Success",
+      description: language === "cs" 
+        ? "Nyní vás přesměrujeme do vašeho emailového klienta"
+        : "You will now be redirected to your email client",
+    })
+    
+    // Reset form
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      message: "",
+      consent: false,
+    })
   }
 
   const scrollToSection = (id: string) => {
@@ -621,10 +631,33 @@ const handleAudioToggle = (url: string) => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold mb-4">{t.contact.contactUs}</h3>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form 
+                action="mailto:vachuska@ekostat.cz" 
+                method="post" 
+                encType="text/plain"
+                className="space-y-4"
+                onSubmit={(e) => {
+                  if (!formData.consent) {
+                    e.preventDefault();
+                    toast({
+                      title: language === "cs" ? "Chyba" : "Error",
+                      description: language === "cs"
+                        ? "Prosím, potvrďte souhlas se zpracováním osobních údajů"
+                        : "Please confirm your consent to process personal data",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
                 <div>
                   <Label htmlFor="name">{t.contact.name}</Label>
-                  <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
+                  <Input 
+                    id="name" 
+                    name="name" 
+                    value={formData.name} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
                 </div>
 
                 <div>
@@ -669,7 +702,6 @@ const handleAudioToggle = (url: string) => {
                     {t.contact.consent}
                   </Label>
                 </div>
-
                 <Button type="submit" className="w-full bg-[#20b2aa] hover:bg-[#48d1cc]">
                   <Send className="h-4 w-4 mr-2" />
                   {t.contact.send}
