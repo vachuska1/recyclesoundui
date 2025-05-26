@@ -647,32 +647,8 @@ const handleAudioToggle = (url: string) => {
                   }
 
                   try {
-                    const response = await fetch('/api/send-email', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify(formData),
-                    });
-
-                    let responseData;
-                    try {
-                      // Clone the response before reading it
-                      const responseClone = response.clone();
-                      try {
-                        responseData = await response.json();
-                      } catch (jsonError) {
-                        // If JSON parsing fails, try to read as text
-                        const text = await responseClone.text();
-                        console.error('Failed to parse JSON response. Raw response:', text);
-                        throw new Error('Invalid response from server');
-                      }
-                    } catch (error) {
-                      console.error('Error processing response:', error);
-                      throw error;
-                    }
-                    
-                    if (response.ok) {
+                    const response = await sendContactForm(formData);
+                    if (response.success) {
                       toast({
                         title: language === "cs" ? "Úspěch" : "Success",
                         description: language === "cs" 
@@ -688,18 +664,7 @@ const handleAudioToggle = (url: string) => {
                         consent: false,
                       });
                     } else {
-                      // Handle API errors with details
-                      const errorDetails = [];
-                      if (responseData.details) errorDetails.push(responseData.details);
-                      if (responseData.error) errorDetails.push(responseData.error);
-                      if (responseData.code) errorDetails.push(`Code: ${responseData.code}`);
-                      
-                      const errorMessage = errorDetails.length > 0 
-                        ? errorDetails.join(' - ') 
-                        : 'Failed to send email';
-                        
-                      console.error('API Error:', responseData);
-                      throw new Error(errorMessage);
+                      throw new Error('Failed to send email');
                     }
                   } catch (error: unknown) {
                     console.error('Error:', error);

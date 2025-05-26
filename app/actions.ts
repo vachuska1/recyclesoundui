@@ -10,14 +10,14 @@ interface ContactFormData {
   consent: boolean;
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendContactForm(formData: ContactFormData) {
   if (!formData.consent) {
     throw new Error("Consent is required");
   }
 
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
     const emailHtml = `
       <h1>Nová zpráva z kontaktního formuláře</h1>
       <p><strong>Jméno:</strong> ${formData.name}</p>
@@ -37,12 +37,15 @@ export async function sendContactForm(formData: ContactFormData) {
 
     if (error) {
       console.error('Resend error:', error);
-      throw new Error('Nepodařilo se odeslat zprávu přes emailovou službu.');
+      return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error) {
     console.error("Error sending email:", error);
-    throw new Error("Nepodařilo se odeslat zprávu. Zkuste to prosím znovu později.");
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Neznámá chyba' 
+    };
   }
 }
