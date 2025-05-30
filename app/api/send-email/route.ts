@@ -10,40 +10,80 @@ const smtpConfig = {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  // Add debug and logger for more detailed error information
-  debug: process.env.NODE_ENV !== 'production',
-  logger: process.env.NODE_ENV !== 'production',
+  // Enable debug and logging in development
+  debug: true,
+  logger: true,
   // Add connection timeout
-  connectionTimeout: 10000, // 10 seconds
+  connectionTimeout: 15000, // 15 seconds
   // Add TLS options
   tls: {
     // Do not fail on invalid certs
     rejectUnauthorized: false
-  }
+  },
+  // Additional debugging
+  socketTimeout: 15000,
+  greetingTimeout: 15000
 };
 
 // Helper function to safely parse JSON
 async function safeJsonParse(response: Response) {
   try {
-    return await response.json();
-  } catch (error) {
     const text = await response.text();
-    console.error('Failed to parse JSON response:', text);
-    return { error: 'Invalid response from server', details: text };
+    try {
+      return JSON.parse(text);
+    } catch (jsonError) {
+      console.error('Failed to parse JSON. Raw response:', text);
+      return { 
+        error: 'Invalid JSON response',
+        details: text,
+        status: response.status,
+        statusText: response.statusText
+      };
+    }
+  } catch (error) {
+    console.error('Failed to read response text:', error);
+    return { 
+      error: 'Failed to read response',
+      details: String(error),
+      status: response.status,
+      statusText: response.statusText
+    };
   }
 }
 
 export async function POST(request: Request) {
-  console.log('Email sending process started');
+  console.log('Email sending process started', {
+    time: new Date().toISOString(),
+    env: {
+      EMAIL_USER: process.env.EMAIL_USER ? 'set' : 'not set',
+      NODE_ENV: process.env.NODE_ENV || 'development'
+    }
+  });
   
   try {
     let requestBody;
     try {
-      requestBody = await request.json();
+      const text = await request.text();
+      try {
+        requestBody = JSON.parse(text);
+      } catch (jsonError) {
+        console.error('Invalid JSON in request. Raw body:', text);
+        return NextResponse.json(
+          { 
+            error: 'Invalid request body', 
+            details: 'Request body must be valid JSON',
+            received: text.substring(0, 200) // Log first 200 chars of invalid JSON
+          },
+          { status: 400 }
+        );
+      }
     } catch (error) {
-      console.error('Invalid JSON in request:', error);
+      console.error('Error reading request body:', error);
       return NextResponse.json(
-        { error: 'Invalid request body', details: 'Request body must be valid JSON' },
+        { 
+          error: 'Error reading request',
+          details: error instanceof Error ? error.message : String(error)
+        },
         { status: 400 }
       );
     }
@@ -67,20 +107,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create a Nodemailer transporter
-    console.log('Creating transporter...');
+    // Create a transporter object
+    console.log('Creating transporter with config:', {
+      ...smtpConfig,
+      auth: {
+        user: smtpConfig.auth.user ? 'set' : 'not set',
+        pass: smtpConfig.auth.pass ? 'set' : 'not set'
+      }
+    });
+    
     const transporter = nodemailer.createTransport(smtpConfig);
 
     // Verify connection configuration
     try {
-      console.log('Verifying SMTP connection...');
+      console.log('Verifying SMTP connection to', smtpConfig.host, '...');
       await new Promise<void>((resolve, reject) => {
-        transporter.verify((error) => {
+        transporter.verify((error, success) => {
           if (error) {
-            console.error('SMTP verify error:', error);
+            console.error('SMTP verify error:', {
+              message: error.message,
+              code: (error as any).code,
+              stack: error.stack,
+              command: (error as any).command
+            });
             reject(error);
           } else {
-            console.log('Server is ready to take our messages');
+            console.log('SMTP connection verified successfully');
             resolve();
           }
         });

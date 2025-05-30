@@ -5,6 +5,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { ChevronLeft, ChevronRight, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -410,22 +411,29 @@ const handleAudioToggle = (url: string) => {
             </div>
 
             <div>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {t.smartContainers.features.map((feature, index) => (
                   <li key={index} className="flex items-start">
-                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#40e0d0] flex items-center justify-center mt-0.5">
-                      <span className="text-white font-bold text-sm">{index + 1}</span>
-                    </div>
-                    <span className="ml-3 text-gray-700">{feature}</span>
+                    <span className="text-[#20b2aa] mr-2">•</span>
+                    <span className="text-gray-700">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <p className="mt-6 text-gray-700 font-medium">{t.smartContainers.conclusion}</p>
 
-              <Button className="mt-6 bg-[#20b2aa] hover:bg-[#48d1cc]" onClick={() => scrollToSection("contact")}>
-                {t.smartContainers.cta}
-              </Button>
+              <div className="mt-6 flex gap-4">
+                <Button className="bg-[#20b2aa] hover:bg-[#48d1cc]" onClick={() => scrollToSection("contact")}>
+                  {t.smartContainers.cta}
+                </Button>
+                <Link 
+                  href="/katalog/A4_folder_T-Master_CZ_PRINT.pdf"
+                  target="_blank"
+                  className="bg-[#48d1cc] hover:bg-[#20b2aa] px-4 py-2 rounded-md text-white transition-colors"
+                >
+                  Katalog
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -656,20 +664,21 @@ const handleAudioToggle = (url: string) => {
                     });
 
                     let responseData;
+                    const responseClone = response.clone();
+                    
+                    // First try to parse as JSON
                     try {
-                      // Clone the response before reading it
-                      const responseClone = response.clone();
+                      responseData = await response.json();
+                    } catch (jsonError) {
+                      // If JSON parsing fails, try to read as text
                       try {
-                        responseData = await response.json();
-                      } catch (jsonError) {
-                        // If JSON parsing fails, try to read as text
                         const text = await responseClone.text();
                         console.error('Failed to parse JSON response. Raw response:', text);
-                        throw new Error('Invalid response from server');
+                        throw new Error(`Invalid response from server: ${text.substring(0, 200)}`);
+                      } catch (textError) {
+                        console.error('Failed to read response as text:', textError);
+                        throw new Error('Could not read server response');
                       }
-                    } catch (error) {
-                      console.error('Error processing response:', error);
-                      throw error;
                     }
                     
                     if (response.ok) {
@@ -688,17 +697,32 @@ const handleAudioToggle = (url: string) => {
                         consent: false,
                       });
                     } else {
-                      // Handle API errors with details
+                      // Handle API errors with more detailed information
                       const errorDetails = [];
-                      if (responseData.details) errorDetails.push(responseData.details);
+                      
+                      // Add all available error information
                       if (responseData.error) errorDetails.push(responseData.error);
+                      if (responseData.details) errorDetails.push(responseData.details);
+                      if (responseData.message) errorDetails.push(responseData.message);
                       if (responseData.code) errorDetails.push(`Code: ${responseData.code}`);
+                      if (responseData.status) errorDetails.push(`Status: ${responseData.status}`);
+                      if (responseData.statusText) errorDetails.push(`Status: ${responseData.statusText}`);
+                      
+                      // If we have no details but have the response, include some of it
+                      if (errorDetails.length === 0 && responseData) {
+                        errorDetails.push(JSON.stringify(responseData).substring(0, 200));
+                      }
                       
                       const errorMessage = errorDetails.length > 0 
-                        ? errorDetails.join(' - ') 
-                        : 'Failed to send email';
+                        ? errorDetails.join(' - ')
+                        : `Failed to send email (Status ${response.status})`;
                         
-                      console.error('API Error:', responseData);
+                      console.error('API Error Response:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        data: responseData
+                      });
+                      
                       throw new Error(errorMessage);
                     }
                   } catch (error: unknown) {
