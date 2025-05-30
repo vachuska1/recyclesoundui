@@ -664,21 +664,20 @@ const handleAudioToggle = (url: string) => {
                     });
 
                     let responseData;
-                    const responseClone = response.clone();
-                    
-                    // First try to parse as JSON
                     try {
-                      responseData = await response.json();
-                    } catch (jsonError) {
-                      // If JSON parsing fails, try to read as text
+                      // Clone the response before reading it
+                      const responseClone = response.clone();
                       try {
+                        responseData = await response.json();
+                      } catch (jsonError) {
+                        // If JSON parsing fails, try to read as text
                         const text = await responseClone.text();
                         console.error('Failed to parse JSON response. Raw response:', text);
-                        throw new Error(`Invalid response from server: ${text.substring(0, 200)}`);
-                      } catch (textError) {
-                        console.error('Failed to read response as text:', textError);
-                        throw new Error('Could not read server response');
+                        throw new Error('Invalid response from server');
                       }
+                    } catch (error) {
+                      console.error('Error processing response:', error);
+                      throw error;
                     }
                     
                     if (response.ok) {
@@ -697,32 +696,17 @@ const handleAudioToggle = (url: string) => {
                         consent: false,
                       });
                     } else {
-                      // Handle API errors with more detailed information
+                      // Handle API errors with details
                       const errorDetails = [];
-                      
-                      // Add all available error information
-                      if (responseData.error) errorDetails.push(responseData.error);
                       if (responseData.details) errorDetails.push(responseData.details);
-                      if (responseData.message) errorDetails.push(responseData.message);
+                      if (responseData.error) errorDetails.push(responseData.error);
                       if (responseData.code) errorDetails.push(`Code: ${responseData.code}`);
-                      if (responseData.status) errorDetails.push(`Status: ${responseData.status}`);
-                      if (responseData.statusText) errorDetails.push(`Status: ${responseData.statusText}`);
-                      
-                      // If we have no details but have the response, include some of it
-                      if (errorDetails.length === 0 && responseData) {
-                        errorDetails.push(JSON.stringify(responseData).substring(0, 200));
-                      }
                       
                       const errorMessage = errorDetails.length > 0 
-                        ? errorDetails.join(' - ')
-                        : `Failed to send email (Status ${response.status})`;
+                        ? errorDetails.join(' - ') 
+                        : 'Failed to send email';
                         
-                      console.error('API Error Response:', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        data: responseData
-                      });
-                      
+                      console.error('API Error:', responseData);
                       throw new Error(errorMessage);
                     }
                   } catch (error: unknown) {
