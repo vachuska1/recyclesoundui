@@ -797,7 +797,7 @@ const handleAudioToggle = (url: string) => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold">Ing. Václav Vachuška, PhD.</h3>
+                  <h3 className="font-semibold">Ing. Václav Vachuška, Ph.D.</h3>
                 </div>
 
                 <div>
@@ -809,7 +809,7 @@ const handleAudioToggle = (url: string) => {
                 </div>
 
                 <div>
-                  <p className="font-medium">Mayerova 1097, 34101 Horažďovice</p>
+                  <p className="font-medium">Mayerova 1067, 34101 Horažďovice</p>
                 </div>
 
                 <div className="pt-4">
