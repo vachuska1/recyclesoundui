@@ -3,7 +3,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Send } from "lucide-react"
@@ -160,7 +160,44 @@ export default function Home() {
     smartContainers: 0,
     mobileContainers: 0,
     detectors: 0,
+    hero: 0,
   })
+  
+  const heroImages = [
+    "/Animation/Animation.png",
+    "/Animation/Drop &Go tre.png",
+    "/Animation/Foto kontjenery WASTE HOIUSE B.png"
+  ]
+  
+  // Auto-rotate hero images
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveSlide(prev => ({
+        ...prev,
+        hero: (prev.hero + 1) % heroImages.length
+      }));
+    }, 5000); // Change slide every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  const handleHeroSlideChange = (direction: 'prev' | 'next') => {
+    setActiveSlide(prev => {
+      const current = prev.hero;
+      let nextIndex;
+      
+      if (direction === 'next') {
+        nextIndex = (current + 1) % heroImages.length;
+      } else {
+        nextIndex = (current - 1 + heroImages.length) % heroImages.length;
+      }
+      
+      return {
+        ...prev,
+        hero: nextIndex
+      };
+    });
+  }
 
   const [formData, setFormData] = useState({
     name: "",
@@ -176,7 +213,7 @@ export default function Home() {
   ) => {
     setActiveSlide((prev) => {
       const maxSlides = 
-        section === "smartContainers" ? 5 : 
+        section === "smartContainers" ? 8 : 
         section === "detectors" ? 3 : 2;
       let newIndex = prev[section]
 
@@ -192,11 +229,13 @@ export default function Home() {
 
   const smartContainerImages = [
     "/smart/bio.webp",
+    "/smart/1.webp",
     "/smart/papir.webp",
+    "/smart/2.webp",
     "/smart/plast.webp",
+    "/smart/3.webp",
     "/smart/sklo.webp",
-    "/smart/smiseny.webp",
-    // ... další 3 fotky
+    "/smart/smiseny.webp"
   ]
 
   const mobileContainerImages = [
@@ -353,20 +392,57 @@ const handleAudioToggle = (url: string) => {
 
 {/* Hero Section */}
 <section className="pt-32 pb-16 px-4 sm:px-6">
-  <div className="mx-auto w-full md:w-3/4 lg:w-3/4 xl:w-3/4 2xl:w-3/4"> {/* 75% width na desktopu */}
+  <div className="mx-auto w-full md:w-3/4 lg:w-3/4 xl:w-3/4 2xl:w-3/4">
     <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-gray-800 mb-8">
       {t.hero.title}
     </h1>
-    <div className="relative w-full" style={{ paddingTop: '56.25%' }}> {/* 16:9 aspect ratio */}
-      <Image
-        src="/Animation/Animation.png"
-        alt="Recycling Hero Image"
-        fill
-        className="object-cover"
-        priority
-        quality={100}
-        sizes="(max-width: 768px) 100vw, 75vw"
-      />
+    <div className="relative w-full overflow-hidden rounded-lg shadow-xl" style={{ paddingTop: '56.25%' }}>
+      {/* Hero Slider */}
+      {heroImages.map((image, index) => (
+        <div 
+          key={index}
+          className={`absolute inset-0 transition-opacity duration-1000 ${index === activeSlide.hero ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          style={{ transition: 'opacity 0.5s ease-in-out' }}
+        >
+          <Image
+            src={image}
+            alt={`Hero Image ${index + 1}`}
+            fill
+            className="object-cover"
+            priority={index === 0}
+            quality={100}
+            sizes="(max-width: 768px) 100vw, 75vw"
+          />
+        </div>
+      ))}
+      
+      {/* Navigation Arrows */}
+      <button
+        onClick={() => handleHeroSlideChange('prev')}
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 hover:bg-white transition-all z-10"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="h-6 w-6 text-[#20b2aa]" />
+      </button>
+      <button
+        onClick={() => handleHeroSlideChange('next')}
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 hover:bg-white transition-all z-10"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="h-6 w-6 text-[#20b2aa]" />
+      </button>
+      
+      {/* Indicators */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+        {heroImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setActiveSlide(prev => ({ ...prev, hero: index }))}
+            className={`w-3 h-3 rounded-full transition-all ${index === activeSlide.hero ? 'bg-[#20b2aa] w-8' : 'bg-white/50'}`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
     </div>
   </div>
 </section>
@@ -401,10 +477,15 @@ const handleAudioToggle = (url: string) => {
                 </button>
               </div>
               <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
-                {[0, 1, 2, 3, 4].map((index) => (
+                {smartContainerImages.map((_, index) => (
                   <div
                     key={index}
-                    className={`h-2 w-2 rounded-full ${activeSlide.smartContainers === index ? "bg-[#20b2aa]" : "bg-gray-300"}`}
+                    className={`h-2 w-2 rounded-full cursor-pointer transition-all ${
+                      activeSlide.smartContainers === index 
+                        ? "bg-[#20b2aa] w-4" 
+                        : "bg-gray-300 hover:bg-gray-400"
+                    }`}
+                    onClick={() => setActiveSlide(prev => ({ ...prev, smartContainers: index }))}
                   />
                 ))}
               </div>
