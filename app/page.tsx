@@ -32,7 +32,7 @@ export default function Home() {
         title: "Udržitelná budoucnost díky modernímu vzdělávání o třídění a snižování množství odpadu",
       },
       smartContainers: {
-        title: "Chytré kontejnery",
+        title: "Chytré kontejnery Drop&Go a WASTE HOUSE",
         subtitle: "Snižování nákladů, zvyšování efektivity a motivace k lepšímu třídění",
         features: [
           "Automatické vážení – váží přesné množství odpadu",
@@ -97,7 +97,7 @@ export default function Home() {
         title: "Sustainable future thanks to modern education about sorting and reducing the amount of waste",
       },
       smartContainers: {
-        title: "Smart containers",
+        title: "Smart containers Drop&Go and WASTE HOUSE",
         subtitle: "Reducing costs, increasing efficiency and motivating for better sorting",
         features: [
           "Automatic weighing – weighs the exact amount of waste",
@@ -166,7 +166,8 @@ export default function Home() {
   const heroImages = [
     "/Animation/Animation.png",
     "/Animation/Drop &Go tre.png",
-    "/Animation/Foto kontjenery WASTE HOIUSE B.png"
+    "/Animation/Foto kontjenery WASTE HOIUSE B.png",
+    "/Animation/hlasic.png"
   ]
   
   // Auto-rotate hero images
