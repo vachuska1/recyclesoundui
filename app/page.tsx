@@ -29,7 +29,7 @@ export default function Home() {
         detectors: "Hlásiče",
       },
       hero: {
-        title: "Udržitelná budoucnost díky modernímu vzdělávání o třídění a snižování množství odpadu",
+        title: "Nové řešení odpadů ve městech a obcích",
       },
       smartContainers: {
         title: "Chytré kontejnery Drop&Go a WASTE HOUSE",
@@ -94,7 +94,7 @@ export default function Home() {
         detectors: "Alarms",
       },
       hero: {
-        title: "Sustainable future thanks to modern education about sorting and reducing the amount of waste",
+        title: "New waste solutions in cities and municipalities",
       },
       smartContainers: {
         title: "Smart containers Drop&Go and WASTE HOUSE",
