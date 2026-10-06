@@ -931,6 +931,7 @@ const handleAudioToggle = (url: string) => {
         &copy; {new Date().getFullYear()} RECYCLESOUND.{" "}
         {language === "cs" ? "Všechna práva vyhrazena." : "All rights reserved."}
       </p>
+      <p className="mt-2 text-sm">Web vytvořil <a href="https://weblepe.cz" rel="nofollow" className="hover:underline">Weblépe.cz</a></p>
     </div>
   </div>
 </footer>
